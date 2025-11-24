@@ -31,18 +31,3 @@ By running the notebook, you will:
 
 ---
 
-## Contents
-
-- **`privacy_memebership_inference_part1.ipynb`**  
-  Main tutorial / assignment notebook.
-
-Minimal setup, designed to run locally or in Colab.
-
----
-
-## Quickstart
-
-### 1) Clone the repo
-```bash
-git clone https://github.com/mhaghifam/membership-inference-DP.git
-cd membership-inference-DP
