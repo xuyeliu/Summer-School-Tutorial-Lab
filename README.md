@@ -1,4 +1,47 @@
-# membership-inference-DP
-Membership Inference Attacks and Differentially Private Training
+# membership-inference-DP  
+**Membership Inference Attacks × Differentially Private Training (MedMNIST)**
 
-This repo contains a notebook on how **Membership Inference Attacks** (MIA)  work and highlights the significance of **differentially private training** in mitigating the success of such attacks. We use **Medical MNIST** dataset from [link](https://medmnist.com/). Our goal here is to show that overfitting creates privacy risk for the individuals whose data appears in the training set.
+> A hands-on, end-to-end notebook that shows how models can leak training data through membership inference — and how differential privacy helps.
+
+---
+
+## Overview
+
+Machine learning models don’t just learn patterns — they can **memorize individual examples**.  
+This repo provides a practical walkthrough of **Membership Inference Attacks (MIA)** and demonstrates how **Differentially Private (DP) training** reduces leakage.
+
+We use **MedMNIST (Medical MNIST)**, a lightweight medical-imaging benchmark, to make the privacy risk concrete: **overfitting increases the attacker’s advantage**.
+
+This notebook later became the basis for an Intro to ML assignment originally developed for the University of Toronto, aimed at giving students real intuition for privacy in ML.  
+Assignment page: https://modelai.gettysburg.edu/2025/privacy/
+
+---
+
+## What you’ll learn
+
+By running the notebook, you will:
+
+1. Train a baseline classifier on MedMNIST.
+2. Measure generalization gap / overfitting.
+3. Implement a simple but strong membership inference attack.
+4. Train the same model with DP (e.g., DP-SGD).
+5. Compare privacy leakage before vs. after DP training.
+6. Understand the privacy–utility tradeoff in practice.
+
+---
+
+## Contents
+
+- **`privacy_memebership_inference_part1.ipynb`**  
+  Main tutorial / assignment notebook.
+
+Minimal setup, designed to run locally or in Colab.
+
+---
+
+## Quickstart
+
+### 1) Clone the repo
+```bash
+git clone https://github.com/mhaghifam/membership-inference-DP.git
+cd membership-inference-DP
