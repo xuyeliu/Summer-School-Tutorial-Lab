@@ -28,3 +28,8 @@ By running the notebook, you will:
 
 ---
 
+
+## Contact
+
+For questions and feedback:
+- **Mahdi Haghifam** - [haghifam.mahdi@gmail.com](mailto:haghifam.mahdi@gmail.com)
