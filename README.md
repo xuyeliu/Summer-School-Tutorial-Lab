@@ -1,9 +1,6 @@
 # membership-inference-DP  
 **Membership Inference Attacks × Differentially Private Training (MedMNIST)**
 
-> A hands-on, end-to-end notebook that shows how models can leak training data through membership inference — and how differential privacy helps.
-
----
 
 ## Overview
 
