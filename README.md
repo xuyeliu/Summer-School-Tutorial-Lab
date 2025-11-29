@@ -1,5 +1,5 @@
-# membership-inference-DP  
-**Membership Inference Attacks × Differentially Private Training (MedMNIST)**
+# Hands-on exploration of membership-inference attack on deep learning models  
+
 
 
 ## Overview
