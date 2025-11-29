@@ -15,7 +15,7 @@ We use **MedMNIST (Medical MNIST)**, a lightweight medical-imaging benchmark, to
 
 ---
 
-## What you’ll learn
+## What is inside
 
 By running the notebook, you will:
 
