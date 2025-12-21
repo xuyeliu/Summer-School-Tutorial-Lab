@@ -21,7 +21,7 @@ By running the notebook, you will:
 
 1. Train a baseline classifier on MedMNIST.
 2. Measure generalization gap / overfitting.
-3. Implement a simple but strong membership inference attack.
+3. Implement a simple but strong membership inference attack based on the confidence of the model as the test statistics. 
 4. Train the same model with DP (e.g., DP-SGD).
 5. Compare privacy leakage before vs. after DP training.
 6. Understand the privacy–utility tradeoff in practice.
