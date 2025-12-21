@@ -10,7 +10,7 @@ This repo provides a practical walkthrough of **Membership Inference Attacks (MI
 This notebook later became the basis for an Intro to ML assignment originally developed for the University of Toronto, aimed at giving students real intuition for privacy in ML.  
 Assignment page: https://modelai.gettysburg.edu/2025/privacy/
 
-We use **MedMNIST (Medical MNIST)**, a lightweight medical-imaging benchmark, to make the privacy risk concrete: **overfitting increases the attacker’s advantage**.
+We use **MedMNIST (Medical MNIST)**, a lightweight medical-imaging benchmark, to make the privacy risk concrete. The main message is that overfitting will have privacy consequences.
 
 
 ---
