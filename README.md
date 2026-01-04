@@ -7,8 +7,8 @@
 
 This repo provides a practical walkthrough of **Membership Inference Attacks (MIA)** and demonstrates how **Differentially Private (DP) training** reduces leakage.
 
-This notebook later became the basis for an Intro to ML assignment originally developed for the University of Toronto, aimed at giving students real intuition for privacy in ML.  
-Assignment page: https://modelai.gettysburg.edu/2025/privacy/
+This notebook later became the basis for a part of the Intro to ML at the University of Toronto, aimed at giving students real intuition for privacy in ML.  
+Page: https://modelai.gettysburg.edu/2025/privacy/
 
 We use **MedMNIST (Medical MNIST)**, a lightweight medical-imaging benchmark, to make the privacy risk concrete. The main message is that overfitting will have privacy consequences.
 
