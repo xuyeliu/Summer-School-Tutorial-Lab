@@ -29,8 +29,13 @@ This 60-minute hands-on lab teaches PhD students to attack a model with membersh
 | Phase 1 | Train baseline | 13 min | Fill 2 lines, observe gap |
 | Phase 2 | MIA attack | 15 min | Fill 3 TODOs (1 line each) |
 | Phase 3 | DP-SGD defense | 15 min | Fill 2 TODOs (3 lines each) |
+| Phase 3b | DP-SGD from scratch (optional deep-dive) | 10 min | Fill TODO 7a/7b (1 line each) |
 | Phase 4 | Trade-off curve | 12 min | Fill 2 TODOs + discussion |
-| **Total** | | **~62 min** | |
+| **Total** | | **~62 min core (+10 min optional)** | |
+
+> **Phase 3b is optional.** It re-implements DP-SGD by hand so students see the clip + noise mechanism directly.
+> Skip it if you are tight on time; the core lab is complete without it. The per-sample loop makes this cell run
+> ~40s (slower than Opacus), so run it once during setup to warm up.
 
 ## Phase-by-Phase Teaching Notes
 
@@ -120,6 +125,46 @@ mia_auc_dp = roc_auc_score(attack_labels_dp, attack_scores_dp)
 - Clipping ensures no single example dominates the gradient
 - Noise makes it impossible to tell if a specific example was present
 - epsilon tracks cumulative privacy loss (composition theorem)
+
+---
+
+### Phase 3b: DP-SGD From Scratch (Optional Deep-Dive)
+
+**Key concept to emphasize**: Opacus is a black box in Phase 3. Here students open it up and see that DP-SGD is just
+ordinary SGD plus exactly two operations — per-sample gradient clipping and Gaussian noise. Everything else (forward,
+backward, optimizer step) is unchanged.
+
+**TODO 7a answer** (per-sample clipping, inside the sample loop):
+```python
+torch.nn.utils.clip_grad_norm_(model.parameters(), max_grad_norm)
+```
+
+**TODO 7b answer** (Gaussian noise on the summed gradient):
+```python
+noise = torch.normal(0.0, noise_multiplier * max_grad_norm,
+                     size=param.shape, device=param.device)
+```
+
+**Expected results** (CNN, full member set, epsilon=8, 15 epochs):
+
+| Approach | Loss Ratio | Test Acc |
+|----------|-----------|----------|
+| Baseline (no DP) | ~1.8x | ~86% |
+| Opacus DP-SGD | ~0.8x | ~82% |
+| Manual DP-SGD (from scratch) | ~0.85x | ~86% |
+
+Both DP methods push the loss ratio toward 1.0 (members and non-members become indistinguishable), confirming the
+hand-written clip + noise reproduces Opacus's protection.
+
+**Common mistakes**:
+- Clipping *outside* the per-sample loop (must clip each sample individually to bound sensitivity)
+- Forgetting to scale noise by `noise_multiplier * max_grad_norm`
+- Adding noise per-sample instead of once to the summed gradient
+
+**Discussion talking points**:
+- The `clip` step bounds sensitivity; the `noise` step provides the formal guarantee — this maps 1:1 to the DP theory.
+- Our loop is slow because it computes one backward pass per sample; Opacus vectorizes this (`torch.func.vmap`).
+- The noise multiplier (sigma) comes from the privacy accountant given (epsilon, delta, sample_rate, epochs).
 
 ---
 
