@@ -2,6 +2,17 @@
 
 
 
+## Run on Google Colab
+
+| Notebook | Link |
+| --- | --- |
+| Student version (with TODOs) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/xuyeliu/Summer-School-Tutorial-Lab/blob/main/privacy_lab_student.ipynb) |
+| Solution version | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/xuyeliu/Summer-School-Tutorial-Lab/blob/main/privacy_lab_solution.ipynb) |
+
+Pick a GPU runtime (`Runtime > Change runtime type > T4 GPU`) and run the setup cell at the top, which clones this repo so the Phase 4 checkpoints are available. TPU is not supported, because Opacus relies on PyTorch per-sample gradients.
+
+---
+
 ## Overview
 
 
