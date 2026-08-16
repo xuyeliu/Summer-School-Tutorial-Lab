@@ -79,11 +79,13 @@ optimizer.step()
 
 **Expected behavior**
 
-- Member accuracy exceeds 95%.
-- Test accuracy falls within the notebook's 75–96% validation range.
-- The member/test accuracy gap is greater than 3 percentage points.
+| Metric | Validation range | Typical value |
+|---|---|---|
+| Member (train) accuracy | > 90% | 96–100% |
+| Test accuracy | 70–98% | 80–92% |
+| Member/test gap | > 2 points | 8–20 points |
 
-Exact values vary by hardware and package version. Focus on the existence of a gap rather than one expected number.
+The Phase 1 validation cell reports `[WARN]` instead of `[FAIL]` when a number lands outside its range, and the phase can continue regardless. The seed fixes initialization and shuffling, but results still move by a few points across hardware (CPU vs GPU, different GPU models, cuDNN kernels) and library versions, so correct student code can legitimately miss a threshold. Focus on the existence of a gap rather than one expected number.
 
 **Common mistakes**
 
@@ -184,10 +186,12 @@ noise = torch.normal(
 
 **Teaching emphasis**
 
-- Clipping must happen inside the per-sample loop.
+- Clipping must happen inside the per-sample loop, before the gradient is accumulated.
 - Clipping limits how much one patient can influence an update.
-- Noise is added to the summed clipped gradient, not independently to each sample in this implementation.
+- Noise is added once to the summed clipped gradient, not independently to each sample. Per-sample noise would inject `batch_size` times more noise than the accountant assumed, so the reported epsilon would no longer describe the run.
 - The manual Python loop favors clarity over speed.
+
+The Understanding Check cell just before this code asks students why clipping must come first. The answer to draw out: the noise scale is calibrated to the clipping bound `C`, so without a per-sample bound there is no finite noise level that hides an individual contribution.
 
 **Common mistakes**
 
@@ -209,6 +213,8 @@ Tell students that Opacus will automate these same core operations and add priva
 Opacus is an open-source library for training PyTorch models with differential privacy. Its `PrivacyEngine` wraps the model, optimizer, and data loader to support per-sample clipping, Gaussian noise, and privacy accounting.
 
 #### TODO 5: Configure private training
+
+The student cell ships each keyword argument set to `None`, so running it unfilled raises a runtime error from Opacus rather than a `SyntaxError`. Students replace the placeholders one by one.
 
 ```python
 privacy_engine = PrivacyEngine()
@@ -336,6 +342,7 @@ There is usually no single correct epsilon. A defensible choice should state its
 | Checkpoint not found | Confirm the `checkpoints/` path or regenerate checkpoints |
 | `MODEL_TYPE` is undefined | Define `MODEL_TYPE = "FC"` before loading the `fc_eps_*` checkpoints |
 | Checkpoint state-dict mismatch | Regenerate checkpoints using the current `SimpleFC` architecture |
+| Phase 1 validation prints `[WARN]` | Expected variance across hardware; continue as long as train accuracy stays clearly above test accuracy |
 | Baseline loss ratio is too small | Confirm TODOs 1–3, then consider increasing baseline epochs |
 | DP loss ratio does not decrease | Confirm that the wrapped model, optimizer, and loader are used |
 | Manual DP-SGD is very slow | Explain that the per-sample Python loop is educational; reduce epochs for a live demo |
