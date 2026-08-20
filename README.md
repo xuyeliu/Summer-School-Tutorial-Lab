@@ -19,13 +19,23 @@ These links open the notebook read-only from GitHub, so nobody can overwrite the
 
 Point people at the short link above rather than the raw Colab URL. It fits on a slide, can be read aloud, and stays valid if a notebook is renamed later.
 
-QR codes for that link live in [`docs/qr/`](docs/qr/) and are also served over Pages, so you can pull them down on whatever machine you are presenting from without carrying image files around:
+QR codes live in [`docs/qr/`](docs/qr/) and are also served over Pages, so you can pull them down on whatever machine you are presenting from without carrying image files around.
+
+Landing page (`xuyeliu.github.io/Summer-School-Tutorial-Lab`):
 
 | File | Use |
 | --- | --- |
 | [`qr_huge_labeled.png`](docs/qr/qr_huge_labeled.png) | Opening slide. Same code with the URL spelled out underneath, for anyone who cannot scan |
 | [`qr_huge.png`](docs/qr/qr_huge.png) / [`.svg`](docs/qr/qr_huge.svg) | Opening slide, bare code |
 | [`qr_corner.png`](docs/qr/qr_corner.png) / [`.svg`](docs/qr/qr_corner.svg) | Small code for the top-right corner of every later slide |
+
+Student notebook in Colab (opens `privacy_lab_student.ipynb` read-only from GitHub; participants then `File > Save a copy in Drive`):
+
+| File | Use |
+| --- | --- |
+| [`qr_notebook_huge_labeled.png`](docs/qr/qr_notebook_huge_labeled.png) | Opening slide, with a caption under the code |
+| [`qr_notebook_huge.png`](docs/qr/qr_notebook_huge.png) / [`.svg`](docs/qr/qr_notebook_huge.svg) | Opening slide, bare code |
+| [`qr_notebook_corner.png`](docs/qr/qr_notebook_corner.png) / [`.svg`](docs/qr/qr_notebook_corner.svg) | Corner code. This URL is denser than the landing-page code, so keep it larger than 1.1 inch if people are scanning from the back of the room |
 
 Placement that actually scans from the back of a room:
 
