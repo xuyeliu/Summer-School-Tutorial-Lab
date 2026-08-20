@@ -1,6 +1,4 @@
-# Hands-on exploration of membership-inference attack on deep learning models  
-
-
+# Privacy Lab: Membership Inference and DP-SGD
 
 ## Run on Google Colab
 
