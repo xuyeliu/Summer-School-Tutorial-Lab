@@ -17,34 +17,33 @@ These links open the notebook read-only from GitHub, so nobody can overwrite the
 
 ## Sharing the lab in a session
 
-Point people at the short link above rather than the raw Colab URL. It fits on a slide, can be read aloud, and stays valid if a notebook is renamed later.
+There are two QR targets. Both open a **read-only** copy, so nobody can overwrite the notebook in this repo. Participants keep their work with `File > Save a copy in Drive`.
 
-QR codes live in [`docs/qr/`](docs/qr/) and are also served over Pages, so you can pull them down on whatever machine you are presenting from without carrying image files around.
+| Target | What it opens | When to use it |
+| --- | --- | --- |
+| GitHub Pages | [xuyeliu.github.io/Summer-School-Tutorial-Lab](https://xuyeliu.github.io/Summer-School-Tutorial-Lab) | Short enough to read aloud; the page then sends people into Colab |
+| Student notebook | [Open in Colab](https://colab.research.google.com/github/xuyeliu/Summer-School-Tutorial-Lab/blob/main/privacy_lab_student.ipynb) | Scan goes straight into the student notebook |
 
-Landing page (`xuyeliu.github.io/Summer-School-Tutorial-Lab`):
+QR codes live in [`docs/qr/`](docs/qr/) and are also served over Pages:
 
-| File | Use |
-| --- | --- |
-| [`qr_huge_labeled.png`](docs/qr/qr_huge_labeled.png) | Opening slide. Same code with the URL spelled out underneath, for anyone who cannot scan |
-| [`qr_huge.png`](docs/qr/qr_huge.png) / [`.svg`](docs/qr/qr_huge.svg) | Opening slide, bare code |
-| [`qr_corner.png`](docs/qr/qr_corner.png) / [`.svg`](docs/qr/qr_corner.svg) | Small code for the top-right corner of every later slide |
-
-Student notebook in Colab (opens `privacy_lab_student.ipynb` read-only from GitHub; participants then `File > Save a copy in Drive`):
-
-| File | Use |
-| --- | --- |
-| [`qr_notebook_huge_labeled.png`](docs/qr/qr_notebook_huge_labeled.png) | Opening slide, with a caption under the code |
-| [`qr_notebook_huge.png`](docs/qr/qr_notebook_huge.png) / [`.svg`](docs/qr/qr_notebook_huge.svg) | Opening slide, bare code |
-| [`qr_notebook_corner.png`](docs/qr/qr_notebook_corner.png) / [`.svg`](docs/qr/qr_notebook_corner.svg) | Corner code. This URL is denser than the landing-page code, so keep it larger than 1.1 inch if people are scanning from the back of the room |
+| File | Opens | Use |
+| --- | --- | --- |
+| [`qr_huge_labeled.png`](docs/qr/qr_huge_labeled.png) | Pages | Opening slide, URL spelled out underneath |
+| [`qr_huge.png`](docs/qr/qr_huge.png) / [`.svg`](docs/qr/qr_huge.svg) | Pages | Opening slide, bare code |
+| [`qr_corner.png`](docs/qr/qr_corner.png) / [`.svg`](docs/qr/qr_corner.svg) | Pages | Later slides, top-right corner |
+| [`qr_colab_huge_labeled.png`](docs/qr/qr_colab_huge_labeled.png) | Student Colab | Opening slide, caption underneath |
+| [`qr_colab_huge.png`](docs/qr/qr_colab_huge.png) / [`.svg`](docs/qr/qr_colab_huge.svg) | Student Colab | Opening slide, bare code |
+| [`qr_colab_corner.png`](docs/qr/qr_colab_corner.png) / [`.svg`](docs/qr/qr_colab_corner.svg) | Student Colab | Later slides, top-right corner |
 
 Placement that actually scans from the back of a room:
 
 - **Opening slide:** centre the code at 45% of the slide height or more.
-- **Later slides:** about 1.1 inch square in the top-right, with a 0.25 inch margin from both edges.
+- **Later slides, Pages code:** about 1.1 inch square in the top-right, with a 0.25 inch margin from both edges.
+- **Later slides, Colab code:** about 1.3 inch square. The Colab URL is longer, so the same 1.1 inch size that works for the Pages code fails from the back of the room.
 - Do not crop the white margin built into the images. That is the QR quiet zone, and most scanners refuse a code without it.
 - Prefer the SVG in vector tools. Both formats have an opaque white background, because a transparent QR is unscannable on a dark slide.
 
-To regenerate after changing the URL, edit `LAB_URL` in [`make_qr.py`](make_qr.py) and run it. The script decodes its own output and fails loudly if the codes do not round-trip, including at the size a projected corner code gives a phone camera:
+To regenerate after changing a URL, edit `PAGES_URL` or `COLAB_URL` in [`make_qr.py`](make_qr.py) and run it. The script decodes its own output and fails loudly if the codes do not round-trip:
 
 ```bash
 pip install segno
