@@ -32,10 +32,10 @@ By running the notebook, you will:
 
 1. Train a baseline classifier on MedMNIST.
 2. Measure generalization gap / overfitting.
-3. Implement a simple but strong membership inference attack based on the confidence of the model as the test statistics. 
-4. Train the same model with DP (e.g., DP-SGD).
+3. Implement a membership inference attack that uses the model's per-sample loss as the test statistic.
+4. Train the same model with DP (e.g., DP-SGD), first from scratch and then with Opacus.
 5. Compare privacy leakage before vs. after DP training.
-6. Understand the privacy–utility tradeoff in practice.
+6. Understand the privacy–utility tradeoff in practice, and why an empirical attack gives a lower bound on leakage rather than a certificate of privacy.
 
 ---
 
