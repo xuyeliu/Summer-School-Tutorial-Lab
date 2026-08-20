@@ -2,6 +2,11 @@
 Generate pre-trained checkpoints for the Privacy Lab Tutorial.
 Trains models at multiple epsilon values for the privacy-utility trade-off visualization.
 
+Every checkpoint uses ONE matched recipe (SGD, lr=0.1, batch 64, 60 epochs) so that
+epsilon is the only variable along the sweep. The eps=inf checkpoint runs the same
+recipe with clipping and noise switched off, and the control checkpoint runs it on the
+validation split, which contains neither members nor non-members.
+
 Usage: python generate_checkpoints.py
 """
 
@@ -16,7 +21,16 @@ import medmnist
 from medmnist import INFO
 from opacus import PrivacyEngine
 
-# Setup
+# Matched training recipe. EPOCHS must be large enough that a non-private model can
+# actually memorize the member split, otherwise the noise level has nothing to suppress
+# and the privacy-utility trade-off is invisible.
+EPOCHS = 60
+LR = 0.1
+BATCH_SIZE = 64
+MAX_GRAD_NORM = 1.0
+DELTA = 1e-5
+EPSILONS = [0.5, 1.0, 2.0, 5.0, 10.0, 50.0, 200.0]
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 torch.manual_seed(42)
@@ -24,7 +38,6 @@ np.random.seed(42)
 
 os.makedirs("checkpoints", exist_ok=True)
 
-# Data
 data_transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.5], std=[0.5])
@@ -35,7 +48,9 @@ DataClass = getattr(medmnist, info['python_class'])
 train_dataset = DataClass(split='train', transform=data_transform, download=True)
 test_dataset = DataClass(split='test', transform=data_transform, download=True)
 
-# Split training data: 40% members, 40% non-members, 20% validation
+# Split training data: 40% members, 40% non-members, 20% validation.
+# This must stay identical to the notebook's split so the checkpoints and the
+# notebook's member_loader / nonmember_loader refer to the same samples.
 total_size = len(train_dataset)
 indices = np.arange(total_size)
 np.random.shuffle(indices)
@@ -44,12 +59,13 @@ split2 = int(0.8 * total_size)
 
 member_indices = indices[:split1]
 nonmember_indices = indices[split1:split2]
+val_indices = indices[split2:]
 
 member_dataset = Subset(train_dataset, member_indices)
+val_dataset = Subset(train_dataset, val_indices)
 test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
 
-# Models
 class SimpleFC(nn.Module):
     def __init__(self):
         super().__init__()
@@ -64,28 +80,8 @@ class SimpleFC(nn.Module):
         return self.fc3(x)
 
 
-class SimpleCNN(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.conv1 = nn.Conv2d(1, 16, 3, padding=1)
-        self.conv2 = nn.Conv2d(16, 32, 3, padding=1)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.fc1 = nn.Linear(32 * 7 * 7, 128)
-        self.fc2 = nn.Linear(128, 1)
-
-    def forward(self, x):
-        x = self.pool(F.relu(self.conv1(x)))
-        x = self.pool(F.relu(self.conv2(x)))
-        x = x.view(x.size(0), -1)
-        x = F.relu(self.fc1(x))
-        return self.fc2(x)
-
-
-def create_model(model_type):
-    if model_type == "cnn":
-        return SimpleCNN().to(device)
-    else:
-        return SimpleFC().to(device)
+def create_model():
+    return SimpleFC().to(device)
 
 
 def evaluate_accuracy(model, dataloader):
@@ -103,12 +99,13 @@ def evaluate_accuracy(model, dataloader):
     return 100.0 * correct / total
 
 
-def train_no_dp(model_type, epochs=30):
-    """Train without differential privacy."""
-    model = create_model(model_type)
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+def train_no_dp(dataset, epochs=EPOCHS):
+    """Matched recipe with clipping and noise switched off."""
+    torch.manual_seed(42)
+    model = create_model()
+    optimizer = torch.optim.SGD(model.parameters(), lr=LR)
     criterion = nn.BCEWithLogitsLoss()
-    train_loader = DataLoader(member_dataset, batch_size=64, shuffle=True)
+    train_loader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True)
 
     for epoch in range(epochs):
         model.train()
@@ -122,19 +119,18 @@ def train_no_dp(model_type, epochs=30):
             optimizer.step()
 
     acc = evaluate_accuracy(model, test_loader)
-    print(f"  No-DP model test accuracy: {acc:.1f}%")
+    member_acc = evaluate_accuracy(model, DataLoader(dataset, batch_size=64))
+    print(f"  test accuracy={acc:.1f}%, train accuracy={member_acc:.1f}%")
     return model
 
 
-def train_with_dp(model_type, epsilon, epochs=20):
-    """Train with DP-SGD at given epsilon."""
-    model = create_model(model_type)
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
+def train_with_dp(epsilon, epochs=EPOCHS):
+    """Matched recipe with DP-SGD at the given epsilon."""
+    torch.manual_seed(42)
+    model = create_model()
+    optimizer = torch.optim.SGD(model.parameters(), lr=LR)
     criterion = nn.BCEWithLogitsLoss()
-    train_loader = DataLoader(member_dataset, batch_size=64, shuffle=True)
-
-    DELTA = 1e-5
-    MAX_GRAD_NORM = 1.0
+    train_loader = DataLoader(member_dataset, batch_size=BATCH_SIZE, shuffle=True)
 
     privacy_engine = PrivacyEngine()
     model, optimizer, train_loader = privacy_engine.make_private_with_epsilon(
@@ -150,6 +146,8 @@ def train_with_dp(model_type, epsilon, epochs=20):
     for epoch in range(epochs):
         model.train()
         for images, labels in train_loader:
+            if images.size(0) == 0:      # Poisson sampling can yield an empty batch
+                continue
             images = images.to(device)
             labels = labels.float().to(device).view(-1, 1)
             optimizer.zero_grad()
@@ -158,39 +156,42 @@ def train_with_dp(model_type, epsilon, epochs=20):
             loss.backward()
             optimizer.step()
 
-    # Get the underlying model state dict
     model_state = model._module.state_dict() if hasattr(model, '_module') else model.state_dict()
-
-    # Create a clean model and load state
-    clean_model = create_model(model_type)
+    clean_model = create_model()
     clean_model.load_state_dict(model_state)
 
     acc = evaluate_accuracy(clean_model, test_loader)
+    member_acc = evaluate_accuracy(clean_model, DataLoader(member_dataset, batch_size=64))
     eps_spent = privacy_engine.get_epsilon(DELTA)
-    print(f"  epsilon={epsilon}: test accuracy={acc:.1f}%, epsilon_spent={eps_spent:.2f}")
+    print(f"  epsilon={epsilon}: test accuracy={acc:.1f}%, train accuracy={member_acc:.1f}%, "
+          f"sigma={optimizer.noise_multiplier:.3f}, epsilon_spent={eps_spent:.2f}")
     return clean_model
 
 
-# Generate checkpoints for both model types
-epsilons = [0.5, 1.0, 2.0, 5.0, 10.0]
+print(f"\n{'='*60}")
+print(f"Matched recipe: SGD lr={LR}, batch={BATCH_SIZE}, {EPOCHS} epochs, C={MAX_GRAD_NORM}")
+print(f"Members: {len(member_dataset)}, non-members: {len(nonmember_indices)}, "
+      f"validation: {len(val_dataset)}")
+print(f"{'='*60}")
 
-for model_type in ["fc", "cnn"]:
-    print(f"\n{'='*50}")
-    print(f"Training {model_type.upper()} models")
-    print(f"{'='*50}")
+# Control: trained on the validation split only, so it has seen neither the member nor
+# the non-member samples. Whatever membership signal it shows is pure split noise, which
+# gives Phase 4 an empirical "no leakage" reference to compare every DP model against.
+print("\nTraining CONTROL model on the validation split (no members, no non-members)...")
+model_control = train_no_dp(val_dataset)
+torch.save(model_control.state_dict(), "checkpoints/fc_control.pt")
 
-    # No-DP model
-    print(f"\nTraining without DP (epsilon=inf)...")
-    model_inf = train_no_dp(model_type, epochs=30 if model_type == "cnn" else 25)
-    torch.save(model_inf.state_dict(), f"checkpoints/{model_type}_eps_inf.pt")
+# Non-private reference: same optimizer and epoch budget, no clipping and no noise.
+print("\nTraining without DP (epsilon=inf)...")
+model_inf = train_no_dp(member_dataset)
+torch.save(model_inf.state_dict(), "checkpoints/fc_eps_inf.pt")
 
-    # DP models at various epsilon
-    for eps in epsilons:
-        print(f"\nTraining with epsilon={eps}...")
-        model_dp = train_with_dp(model_type, eps, epochs=20)
-        torch.save(model_dp.state_dict(), f"checkpoints/{model_type}_eps_{eps}.pt")
+for eps in EPSILONS:
+    print(f"\nTraining with epsilon={eps}...")
+    model_dp = train_with_dp(eps)
+    torch.save(model_dp.state_dict(), f"checkpoints/fc_eps_{eps}.pt")
 
-print(f"\n{'='*50}")
+print(f"\n{'='*60}")
 print("All checkpoints generated successfully!")
 print(f"Files saved in: {os.path.abspath('checkpoints/')}")
-print(f"{'='*50}")
+print(f"{'='*60}")
