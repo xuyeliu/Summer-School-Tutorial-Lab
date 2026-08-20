@@ -1,6 +1,6 @@
 """Generate the QR codes that point participants at the lab.
 
-Run this after changing LAB_URL:
+Run this after changing a URL in CODES:
 
     pip install segno
     python make_qr.py
@@ -14,11 +14,6 @@ import os
 
 import segno
 
-# The GitHub Pages landing page, not the Colab URL directly. Two reasons: it is short
-# enough to read aloud and type, and it survives the notebook being renamed or moved.
-LAB_URL = 'https://xuyeliu.github.io/Summer-School-Tutorial-Lab/'
-SPOKEN_URL = 'xuyeliu.github.io/Summer-School-Tutorial-Lab'
-
 OUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'docs', 'qr')
 
 # Error correction M (15%) is the sweet spot here. Higher levels add modules, which makes
@@ -31,8 +26,29 @@ ERROR_LEVEL = 'm'
 BORDER = 4
 
 TARGETS = [
-    ('qr_huge', 2400),    # opening slide, full screen
-    ('qr_corner', 800),   # top-right corner of every slide after that
+    ('huge', 2400),    # opening slide, full screen
+    ('corner', 800),   # top-right corner of every slide after that
+]
+
+# Two codes. The landing-page URL is short enough to read aloud. The Colab URL opens
+# the student notebook read-only from GitHub, so nobody overwrites the copy in this repo.
+CODES = [
+    {
+        'prefix': 'qr',
+        'url': 'https://xuyeliu.github.io/Summer-School-Tutorial-Lab/',
+        'caption': 'xuyeliu.github.io/Summer-School-Tutorial-Lab',
+        'check_corner_at_100px': True,
+    },
+    {
+        'prefix': 'qr_notebook',
+        'url': ('https://colab.research.google.com/github/xuyeliu/'
+                'Summer-School-Tutorial-Lab/blob/main/privacy_lab_student.ipynb'),
+        # The Colab URL is too long to type. Spell out what the scan opens.
+        'caption': 'Student notebook  ·  Google Colab',
+        # This URL makes a denser symbol. A 1-inch corner code will not decode; use
+        # the huge file on the opening slide, and keep the corner code larger.
+        'check_corner_at_100px': False,
+    },
 ]
 
 
@@ -42,11 +58,10 @@ def scale_for(qr, target_px):
     return max(1, round(target_px / modules))
 
 
-def write_labeled(qr, path, scale):
-    """The opening slide needs the URL spelled out under the code, for anyone not scanning."""
+def write_labeled(qr, path, scale, caption):
+    """The opening slide needs a caption under the code, for anyone not scanning."""
     from PIL import Image, ImageDraw, ImageFont
 
-    qr_img = Image.new('RGB', (1, 1))
     tmp = path + '.tmp.png'
     qr.save(tmp, scale=scale, border=BORDER, dark='black', light='white')
     qr_img = Image.open(tmp).convert('RGB')
@@ -62,9 +77,9 @@ def write_labeled(qr, path, scale):
     canvas.paste(qr_img, (0, 0))
 
     draw = ImageDraw.Draw(canvas)
-    left, top, right, bottom = draw.textbbox((0, 0), SPOKEN_URL, font=font)
+    left, top, right, bottom = draw.textbbox((0, 0), caption, font=font)
     draw.text(((width - (right - left)) // 2 - left, qr_img.height + pad_top - top),
-              SPOKEN_URL, fill='black', font=font)
+              caption, fill='black', font=font)
     canvas.save(path)
     return canvas.size
 
@@ -93,12 +108,8 @@ def _load_font(size_px):
     return ImageFont.load_default()
 
 
-def verify(paths):
-    """Decode what we just wrote and confirm it round-trips to LAB_URL.
-
-    Also decodes the corner code shrunk to 100px, which is roughly what a 1 inch element
-    on a projected slide gives a phone camera.
-    """
+def verify(url, png_paths, check_corner_at_100px, corner_png):
+    """Decode what we just wrote and confirm it round-trips to the intended URL."""
     try:
         import cv2
         import numpy as np
@@ -109,43 +120,54 @@ def verify(paths):
 
     detector = cv2.QRCodeDetector()
     print()
-    for path in paths:
+    for path in png_paths:
         decoded, _, _ = detector.detectAndDecode(cv2.imread(path))
-        status = 'OK ' if decoded == LAB_URL else 'FAIL'
+        status = 'OK ' if decoded == url else 'FAIL'
         print(f'  [{status}] decoded {os.path.basename(path)}')
-        assert decoded == LAB_URL, f'{path} decoded to {decoded!r}, expected {LAB_URL!r}'
+        assert decoded == url, f'{path} decoded to {decoded!r}, expected {url!r}'
 
-    small = Image.open(os.path.join(OUT_DIR, 'qr_corner.png')).resize((100, 100),
-                                                                     Image.LANCZOS)
-    decoded, _, _ = detector.detectAndDecode(np.array(small.convert('RGB'))[:, :, ::-1])
-    assert decoded == LAB_URL, f'corner code failed at 100px, decoded {decoded!r}'
-    print('  [OK ] decoded qr_corner.png shrunk to 100px (projected-slide size)')
+    if check_corner_at_100px:
+        small = Image.open(corner_png).resize((100, 100), Image.LANCZOS)
+        decoded, _, _ = detector.detectAndDecode(np.array(small.convert('RGB'))[:, :, ::-1])
+        assert decoded == url, f'corner code failed at 100px, decoded {decoded!r}'
+        print('  [OK ] decoded corner code shrunk to 100px (projected-slide size)')
 
 
-def main():
-    os.makedirs(OUT_DIR, exist_ok=True)
-    qr = segno.make(LAB_URL, error=ERROR_LEVEL)
-    print(f'{LAB_URL}\n  QR version {qr.version}, '
+def render(spec):
+    url = spec['url']
+    prefix = spec['prefix']
+    qr = segno.make(url, error=ERROR_LEVEL)
+    print(f'{url}\n  QR version {qr.version}, '
           f'{qr.symbol_size(border=BORDER)[0]} modules per side including the quiet zone\n')
 
     png_paths = []
+    corner_png = None
     for name, target_px in TARGETS:
         scale = scale_for(qr, target_px)
-        png = os.path.join(OUT_DIR, f'{name}.png')
-        svg = os.path.join(OUT_DIR, f'{name}.svg')
+        png = os.path.join(OUT_DIR, f'{prefix}_{name}.png')
+        svg = os.path.join(OUT_DIR, f'{prefix}_{name}.svg')
         # light= keeps the background opaque white. A transparent QR is unscannable on
         # any dark-background slide, which is the classic way this goes wrong in a talk.
         qr.save(png, scale=scale, border=BORDER, dark='black', light='white')
         qr.save(svg, scale=scale, border=BORDER, dark='black', light='white')
         px = qr.symbol_size(scale=scale, border=BORDER)[0]
-        print(f'  {name}.png / .svg  {px}x{px} px (scale {scale})')
+        print(f'  {prefix}_{name}.png / .svg  {px}x{px} px (scale {scale})')
         png_paths.append(png)
+        if name == 'corner':
+            corner_png = png
 
-    labeled = os.path.join(OUT_DIR, 'qr_huge_labeled.png')
-    size = write_labeled(qr, labeled, scale_for(qr, dict(TARGETS)['qr_huge']))
-    print(f'  qr_huge_labeled.png  {size[0]}x{size[1]} px (URL caption underneath)')
+    labeled = os.path.join(OUT_DIR, f'{prefix}_huge_labeled.png')
+    size = write_labeled(qr, labeled, scale_for(qr, dict(TARGETS)['huge']), spec['caption'])
+    print(f'  {prefix}_huge_labeled.png  {size[0]}x{size[1]} px (caption underneath)')
 
-    verify(png_paths)
+    verify(url, png_paths, spec['check_corner_at_100px'], corner_png)
+    print()
+
+
+def main():
+    os.makedirs(OUT_DIR, exist_ok=True)
+    for spec in CODES:
+        render(spec)
 
 
 if __name__ == '__main__':
