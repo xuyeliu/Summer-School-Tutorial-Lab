@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Lab: Membership Inference and DP-SGD</title>
+<meta name="description" content="Hands-on lab on membership inference attacks and differentially private training. Opens in Google Colab.">
+<style>
+  :root {
+    --ink: #14181f;
+    --muted: #5b6472;
+    --line: #e3e7ed;
+    --accent: #f9ab00;
+    --accent-ink: #202124;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 2.5rem 1.25rem 4rem;
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: #fff;
+    display: flex;
+    justify-content: center;
+  }
+  main { width: 100%; max-width: 34rem; }
+  h1 { font-size: 1.6rem; line-height: 1.25; margin: 0 0 .5rem; letter-spacing: -.01em; }
+  .sub { color: var(--muted); margin: 0 0 2rem; }
+  .cta {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-size: 1.2rem;
+    font-weight: 700;
+    padding: 1.1rem 1.25rem;
+    border-radius: .7rem;
+    border: 1px solid rgba(0,0,0,.08);
+  }
+  .cta:hover { filter: brightness(1.05); }
+  .cta small { display: block; font-size: .8rem; font-weight: 500; opacity: .75; margin-top: .2rem; }
+  ol { margin: 2rem 0 0; padding-left: 1.4rem; }
+  li { margin-bottom: .9rem; }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: .88em;
+    background: #f4f6f9;
+    padding: .12em .38em;
+    border-radius: .25em;
+  }
+  .url {
+    margin-top: 2rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: .9rem;
+  }
+  .url code { display: inline-block; margin-top: .35rem; background: #f4f6f9; padding: .5em .6em; word-break: break-all; }
+  footer { margin-top: 2rem; color: var(--muted); font-size: .85rem; }
+  footer a { color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Privacy Lab: Membership Inference and DP-SGD</h1>
+  <p class="sub">Attack a model to tell whether a patient's X-ray was in its training set, then defend it with differentially private training.</p>
+
+  <a class="cta" href="https://colab.research.google.com/github/xuyeliu/Summer-School-Tutorial-Lab/blob/main/privacy_lab_student.ipynb">
+    Open the lab in Google Colab
+    <small>No install needed, runs in your browser</small>
+  </a>
+
+  <ol>
+    <li>Pick a GPU: <code>Runtime &gt; Change runtime type &gt; T4 GPU</code>. CPU works but Phase 3a is slow. TPU is not supported, because Opacus needs PyTorch per-sample gradients.</li>
+    <li>Run the setup cell at the top. It downloads the pre-trained checkpoints that Phase 4 needs.</li>
+    <li><strong>To keep your work, choose <code>File &gt; Save a copy in Drive</code>.</strong> The lab opens read-only from GitHub, so without a copy your edits disappear when the tab closes.</li>
+  </ol>
+
+  <p class="url">
+    Cannot scan the code? Type this:
+    <code>xuyeliu.github.io/Summer-School-Tutorial-Lab</code>
+  </p>
+
+  <footer>
+    Source, solutions, and the instructor guide:
+    <a href="https://github.com/xuyeliu/Summer-School-Tutorial-Lab">github.com/xuyeliu/Summer-School-Tutorial-Lab</a>
+  </footer>
+</main>
+</body>
+</html>
