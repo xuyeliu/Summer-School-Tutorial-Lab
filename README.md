@@ -50,9 +50,6 @@ python make_qr.py
 
 This repo provides a practical walkthrough of **Membership Inference Attacks (MIA)** and demonstrates how **Differentially Private (DP) training** reduces leakage.
 
-This notebook later became the basis for a part of the Intro to ML at the University of Toronto, aimed at giving students real intuition for privacy in ML.  
-Page: https://modelai.gettysburg.edu/2025/privacy/
-
 We use **MedMNIST (Medical MNIST)**, a lightweight medical-imaging benchmark, to make the privacy risk concrete. The main message is that overfitting will have privacy consequences.
 
 
@@ -68,11 +65,3 @@ By running the notebook, you will:
 4. Train the same model with DP (e.g., DP-SGD), first from scratch and then with Opacus.
 5. Compare privacy leakage before vs. after DP training.
 6. Understand the privacy–utility tradeoff in practice, and why an empirical attack gives a lower bound on leakage rather than a certificate of privacy.
-
----
-
-
-## Contact
-
-For questions and feedback:
-- **Mahdi Haghifam** - [haghifam.mahdi@gmail.com](mailto:haghifam.mahdi@gmail.com)
