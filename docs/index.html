@@ -20,10 +20,8 @@
     font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     color: var(--ink);
     background: #fff;
-    display: flex;
-    justify-content: center;
   }
-  main { width: 100%; max-width: 34rem; }
+  main { max-width: 34rem; margin: 0 auto; }
   h1 { font-size: 1.6rem; line-height: 1.25; margin: 0 0 .5rem; letter-spacing: -.01em; }
   .sub { color: var(--muted); margin: 0 0 2rem; }
   .cta {
@@ -48,6 +46,9 @@
     background: #f4f6f9;
     padding: .12em .38em;
     border-radius: .25em;
+    /* Phone viewports are the main case here, and these tokens are long enough to
+       push the page into horizontal scrolling without this. */
+    overflow-wrap: anywhere;
   }
   .url {
     margin-top: 2rem;
