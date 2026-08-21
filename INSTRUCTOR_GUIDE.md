@@ -230,6 +230,10 @@ noise = torch.normal(
 
 The Understanding Check cell asks why clipping must come first. The answer to draw out: the noise scale is calibrated to the clipping bound `C`, so without a per-sample bound there is no finite noise level that hides an individual contribution.
 
+**The Phase 3a figure**
+
+The cell immediately after the from-scratch training loop draws the same two-panel log-CDF as Phase 3b, with the baseline on the left and the hand-written DP model on the right. Students should see the membership gap close *before* Opacus enters the picture: the loss ratio drops from about 6.2x to about 0.84x, and the two curves overlap. Say this out loud: clip-then-noise is doing the work, not the library. The formal guarantee still comes from the mechanism, not from this attack plot.
+
 **Common mistakes**
 
 - Clipping only after gradients have been aggregated.
@@ -308,7 +312,7 @@ There is no longer a target AUC. The old `MIA AUC < 0.58` target was vacuous, si
 
 **The comparison figure**
 
-The cell after the manual-versus-Opacus table draws accuracy and leakage side by side for all three models, because a text table gets skimmed past.
+Phase 3a already showed that the hand-written clip-then-noise loop closes the CDF gap. The matching Opacus figure in this phase should look the same. The cell after the manual-versus-Opacus table then draws accuracy and leakage side by side for all three models, because a text table gets skimmed past.
 
 Be ready for a result that looks wrong. On the current recipe, DP costs essentially no *test* accuracy (about 82% to 84%) while the loss ratio collapses from 6.2x to 0.86x. The visible cost is in *train* accuracy, 99% down to about 94%. Say this out loud rather than glossing over it: clipping and noise also act as regularizers, so a model that memorizes less can generalize just as well, and the training-accuracy drop *is* the defense, because the memorization it removed is exactly what the attack was exploiting. The cell prints this interpretation automatically and adapts if test accuracy does fall on your hardware.
 
