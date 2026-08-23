@@ -22,9 +22,9 @@ Do **not** walk the room through the notebook cell by cell. Your role is facilit
 1. **Open with a 1-2 minute overview.** Do not let anyone start the notebook until you have said what the lab is about and what the four phases are. The Lab Roadmap cell (cell 3) exists for exactly this and mirrors what you should say out loud. In the last review, several people opened the notebook without knowing what they were about to do or why each step existed.
 2. **Release one phase at a time.** Give roughly 15 to 20 minutes per phase and let students read the instructions and code themselves.
 3. **Stop at the phase checkpoint.** Ask who finished. Hand out hints, or the solution cell, to anyone stuck.
-4. **Spend a few minutes on the takeaway** using the checkpoint discussion cells before releasing the next phase.
+4. **Spend about three minutes on the checkpoint** before releasing the next phase. Run the script in each phase below. Do not invent extra questions.
 
-Phases 1, 2 and 4 end with an explicit "Checkpoint — Discussion" markdown cell holding the questions to run.
+Phases 1, 2, 3a, and 4 have a discussion cell. Phase 3b does not — do not open one. Takeaways sit behind an "After you discuss" disclosure. Do not read that disclosure aloud first.
 
 ## Time Allocation
 
@@ -35,8 +35,8 @@ Phases 1, 2 and 4 end with an explicit "Checkpoint — Discussion" markdown cell
 | Phase 0 | Explore and split PneumoniaMNIST | 5 min | Run and inspect |
 | Phase 1 | Train the non-private baseline | 15 min | Complete TODO 1, then discuss |
 | Phase 2 | Mount the membership inference attack | 15 min | Complete TODOs 2-3, then discuss |
-| Phase 3a | Implement DP-SGD from scratch | 20 min | Complete TODOs 4a-4b |
-| Phase 3b | Train with Opacus and repeat the attack | 15 min | Complete TODOs 5-7 |
+| Phase 3a | Implement DP-SGD from scratch | 20 min | Complete TODOs 4a-4b, then discuss |
+| Phase 3b | Train with Opacus and repeat the attack | 15 min | Complete TODOs 5-7; no discussion |
 | Comparison | Baseline vs manual DP vs Opacus, accuracy and leakage together | 3 min | Run and read the figure |
 | Phase 4 | Evaluate the privacy-utility trade-off | 15 min | Complete TODO 8 and discuss |
 | **Total** |  | **~92 min** |  |
@@ -44,6 +44,17 @@ Phases 1, 2 and 4 end with an explicit "Checkpoint — Discussion" markdown cell
 Phase 3a was previously budgeted at 10 minutes, which was too short: students have to implement both per-example clipping and Gaussian noise addition. Budget 20 minutes.
 
 If you only have 60 minutes, pre-run the baseline training and treat the manual DP-SGD implementation as an instructor-led walkthrough. Keep the conceptual order: students should see clipping and noise in Phase 3a before Opacus automates them in Phase 3b.
+
+## How to run a checkpoint discussion
+
+Each checkpoint is built so the room cannot stall on "any thoughts?"
+
+- **Start with a number, not a concept.** Ask two people for their train/test, loss ratio, or chosen epsilon before you ask why.
+- **Force a side.** "Agree or disagree." "Train or test in the abstract." Then take one sentence from each side. Do not ask whether Phase 1 is "already privacy." Train/test is not member/non-member.
+- **You talk last.** The student cell hides the takeaway. Do not lecture it first.
+- **If nobody speaks after five seconds,** make the slightly wrong claim written in that phase and let them correct you. Do not rephrase the question.
+- **One primary question, then sit down.** Use the second question only if the first dies or you have leftover time.
+- **Three minutes is enough.** Land one sentence and release the next phase. A partial answer is fine; a second lecture is not.
 
 ## Pre-Session Setup
 
@@ -105,9 +116,13 @@ The validation cell no longer checks a numeric range for test accuracy. It previ
 
 **Checkpoint discussion**
 
-- What do the train and test accuracies tell us?
-- Is there a generalization gap?
-- Why might a model with different behavior on seen versus unseen samples later be vulnerable to membership inference?
+The student cell asks which accuracy goes in a paper abstract, and what you would still need before calling the gap a membership leak. Do not let anyone name Phase 1 a leak. Train accuracy is measured on the member split; the other number is the official **test** set, not the held-out non-members.
+
+- **Open.** "Read out your two accuracies. I need two people." After two numbers: "Abstract gets train or test? And is this already a membership leak — yes or no."
+- **Good answers.** Abstract: test. The gap is overfitting: the model fits the training split better than the test set. That is not a leak. A leak needs members versus a matched non-member holdout, and a per-sample signal, not two aggregate accuracies. Some will say "test is also unseen, so it is the same idea." Let them say it, then correct the sets.
+- **If the room freezes.** "The test set is unseen, so this already is membership inference. We can skip Phase 2." Then wait.
+- **Land.** "This is a generalization gap. Leakage starts in Phase 2, when we compare members to the held-out non-members."
+- **Do not** ask "what do the accuracies tell us," "is there a gap," or "is this already a privacy problem." They can see the gap. Privacy language waits for Phase 2.
 
 **Common mistakes**
 
@@ -176,10 +191,13 @@ That is why the cell 12 plot now uses a logarithmic loss axis plus a tail surviv
 
 **Checkpoint discussion**
 
-- Why do member samples tend to have lower loss than non-member samples?
-- What does the loss ratio represent, and what value means no leakage?
-- If the distributions became more similar, what would that imply about membership leakage?
-- How does this relate to the Phase 1 train/test gap?
+The student cell puts an auditor on record: "AUC is chance, so this model does not leak." Do not explain the AUC before they take a side.
+
+- **Open.** "I need two numbers from the same person: your loss ratio and your AUC." Write them up. "Agree or disagree with the auditor."
+- **Good answers.** Disagree: ratio is about 6×, and the tail plot shows large losses that members almost never have. The at-risk people are in the tail, not the typical patient. Reporting only AUC would hide them.
+- **If the room freezes.** "I'm with the auditor. AUC is the standard metric. Chance means we failed to find leakage, so Phase 1 was just overfitting." Then wait.
+- **Land.** Reveal the disclosure, or say: "AUC needs a global threshold. Most losses are near zero on both sides, so they tie. The leak lives in the tail. That is why Phase 4 measures a tail rate."
+- **Do not** ask "what does the loss ratio mean." Do not unpack the percentile table first.
 
 **Common mistakes**
 
@@ -232,7 +250,17 @@ The Understanding Check cell asks why clipping must come first. The answer to dr
 
 **The Phase 3a figure**
 
-The cell immediately after the from-scratch training loop draws the same two-panel log-CDF as Phase 3b, with the baseline on the left and the hand-written DP model on the right. Students should see the membership gap close *before* Opacus enters the picture: the loss ratio drops from about 6.2x to about 0.84x, and the two curves overlap. Say this out loud: clip-then-noise is doing the work, not the library. The formal guarantee still comes from the mechanism, not from this attack plot.
+The cell immediately after the from-scratch training loop draws the same two-panel log-CDF as Phase 3b, with the baseline on the left and the hand-written DP model on the right. Students should see the membership gap close *before* Opacus enters the picture: the loss ratio drops from about 6.2x to about 0.84x, and the two curves overlap.
+
+**Checkpoint discussion**
+
+Run this immediately after the manual DP figure, **before** releasing Phase 3b. The student cell asks whether test accuracy fell, what they actually paid, and what DP-SGD adds that ordinary regularization does not.
+
+- **Open.** "Three numbers versus Phase 1: test acc, train acc, loss ratio. Did test accuracy fall — yes or no?" Then: "So what did you pay?"
+- **Good answers.** Test acc usually holds (about 82–84%). Train acc drops (99% to about 94%). Loss ratio collapses toward 1. The cost is memorization, which was the attack surface. Regularization can do some of this; it does not give (ε, δ).
+- **If the room freezes.** "DP failed: we paid nothing, test accuracy went up slightly, so the privacy must be fake." Then wait.
+- **Land.** "A failed attack is not a proof. The accountant is. We come back to that when the Phase 4 curve is flat. Clip-then-noise is doing the work, not the library."
+- **Do not** ask why the CDFs overlap. They can see it.
 
 **Common mistakes**
 
@@ -304,11 +332,9 @@ loss_ratio_dp = np.mean(nonmember_signals_dp) / (
 
 There is no longer a target AUC. The old `MIA AUC < 0.58` target was vacuous, since the baseline already measures about 0.50.
 
-**Discussion guidance**
+**No discussion here**
 
-- A loss ratio closer to 1 means members and non-members have more similar average loss.
-- The empirical attack results illustrate reduced leakage. The formal guarantee comes from the DP mechanism and its accountant, not from the attack metric. A failed attack does not prove privacy.
-- Epsilon tracks cumulative privacy loss over training.
+Say one sentence while they run the comparison figure: "Same two steps you wrote, vectorized. Clip caps sensitivity; noise is what the accountant uses." If someone asks about vmap or functorch, "Opacus uses vectorized per-sample gradients; we will not go into the autograd internals." Do not open a new question. If they finished early, send them back to the Phase 3a prompt.
 
 **The comparison figure**
 
@@ -398,18 +424,15 @@ Distinguishing the two groups in either direction is a privacy failure, so the m
 
 **Final discussion guidance**
 
-For a pneumonia diagnosis system, ask students to justify an epsilon. Point out that they cannot do it from the leakage panel, because it is flat, which forces them to reason about:
+The student cell asks them to write an epsilon first, then answer a hospital that wants to ship ε = 200 because the leakage panel is flat. Do not walk the old five-question list. Do not lecture "clipping does the work" until after they have chosen a number.
 
-- What harm could result from revealing that a patient was in the training data?
-- What minimum accuracy is required for the intended clinical role?
-- What attacker access and knowledge are assumed?
-- Will repeated training runs or model releases compose additional privacy loss?
-- Do some patient subgroups lose more accuracy than others?
-- What policies, laws, clinicians, and patient perspectives should inform the decision?
-
-There is usually no single correct epsilon. A defensible choice states its assumptions, documents the trade-off, and is validated empirically.
-
-Close by asking what would change on a harder task, such as a larger model, a rarer condition, or a language model trained on documents that appear only once. That is the bridge to the challenge.
+- **Open.** "Thirty seconds. Write an epsilon you would ship. Do not talk yet." Then: "Hands: who wrote 2 or below? Who wrote 10 or above?" Pick one from each side. Then read the hospital line.
+- **Good answers.** They cannot use the leakage panel, because it is flat. They have to use utility, the harm of revealing membership, composition, subgroups, and policy. ε = 200 is not certified by a failed attack. On documents that appear once, they should expect real memorization, so the curve may move.
+- **If everyone writes the same number.** You write a different one and ask them to talk you out of it.
+- **If the room freezes.** "Ship ε = 200. The attack panel is the measurement. It is flat, so we are done." Then wait.
+- **If someone thinks the plot is broken.** "It is not. This attack is on the floor for every finite ε. That is the lesson, not a bug." Then land the lower-bound line.
+- **Land.** "An attack is a lower bound. It never certifies privacy. Tomorrow, on text that appears once, do not expect this instrument to stay blind."
+- **Do not** ask them to list factors. If a defense is only about accuracy, prompt once: "You only talked about accuracy. What about a patient whose membership is the sensitive fact?" Then stop.
 
 ## Connecting to the Challenge
 
