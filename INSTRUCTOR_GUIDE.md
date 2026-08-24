@@ -71,7 +71,7 @@ Each checkpoint is built so the room cannot stall on "any thoughts?"
 **Key concepts**
 
 - PneumoniaMNIST is a binary classification dataset of normalized 28x28 chest X-rays.
-- The training pool is split into disjoint member, non-member, and validation groups.
+- The training pool is split into disjoint member (40%) and non-member (40%) groups. The leftover 20% is not loaded in the notebook; `generate_checkpoints.py` uses it to train the control model.
 - Only the member split is used to train the target model.
 
 **Teaching emphasis**
@@ -181,11 +181,11 @@ That is why the cell 12 plot now uses a logarithmic loss axis plus a tail surviv
 
 **Checkpoint discussion**
 
-The student cell puts an auditor on record: "AUC is chance, so this model does not leak." Do not explain the AUC before they take a side.
+The student cell puts an auditor on record: "The AUC is no better than random guessing, so this model does not leak." Do not explain the AUC before they take a side.
 
 - **Open.** "I need two numbers from the same person: your loss ratio and your AUC." Write them up. "Agree or disagree with the auditor."
 - **Good answers.** Disagree: ratio is about 6×, and the tail plot shows large losses that members almost never have. The at-risk people are in the tail, not the typical patient. Reporting only AUC would hide them.
-- **If the room freezes.** "I'm with the auditor. AUC is the standard metric. Chance means we failed to find leakage, so Phase 1 was just overfitting." Then wait.
+- **If the room freezes.** "I'm with the auditor. AUC is the standard metric. About 0.5 means we failed to find leakage, so Phase 1 was just overfitting." Then wait.
 - **Land.** Reveal the disclosure, or say: "AUC needs a global threshold. Most losses are near zero on both sides, so they tie. The leak lives in the tail. That is why Phase 4 measures a tail rate."
 - **Do not** ask "what does the loss ratio mean." Do not unpack the percentile table first.
 
@@ -349,7 +349,7 @@ Phase 4 is where a real utility cost appears, since epsilon = 0.5 gives up more 
 Every checkpoint uses one matched recipe: SGD, lr 0.1, batch 64, 60 epochs, clipping norm C = 1.0. Only epsilon varies. Two checkpoints anchor the sweep:
 
 - `fc_eps_inf.pt` runs the same recipe with clipping and noise switched off. It is the non-private endpoint.
-- `fc_control.pt` is trained on the validation split, so it has seen neither members nor non-members and cannot leak about either. Its measured membership signal is pure measurement noise, which gives the class an empirical "no leakage" reference. This matters because the loss ratio of a non-leaking model is only approximately 1.0, not exactly 1.0.
+- `fc_control.pt` is trained on the leftover 20% of the training pool, so it has seen neither members nor non-members and cannot leak about either. Its measured membership signal is pure measurement noise, which gives the class an empirical "no leakage" reference. This matters because the loss ratio of a non-leaking model is only approximately 1.0, not exactly 1.0.
 
 An earlier version of this lab produced a genuinely confusing plot, and the cause was the recipe, not the plotting. The DP checkpoints trained for 20 epochs, a budget at which this model cannot memorize the member split **even with zero noise** (measured loss ratio 1.36 at 20 epochs, 5.5 at 50, 116 at 100). There was therefore no leakage for epsilon to modulate. Meanwhile the non-private checkpoint used Adam for 25 epochs, so the apparent cliff between epsilon = 10 and epsilon = inf was an optimizer artifact, and its overfitting was why its test accuracy fell *below* epsilon = 5 and epsilon = 10. Do not shorten the epoch budget when regenerating checkpoints.
 

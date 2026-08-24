@@ -5,7 +5,7 @@ Trains models at multiple epsilon values for the privacy-utility trade-off visua
 Every checkpoint uses ONE matched recipe (SGD, lr=0.1, batch 64, 60 epochs) so that
 epsilon is the only variable along the sweep. The eps=inf checkpoint runs the same
 recipe with clipping and noise switched off, and the control checkpoint runs it on the
-validation split, which contains neither members nor non-members.
+leftover 20% of the training pool, which contains neither members nor non-members.
 
 Usage: python generate_checkpoints.py
 """
@@ -48,9 +48,10 @@ DataClass = getattr(medmnist, info['python_class'])
 train_dataset = DataClass(split='train', transform=data_transform, download=True)
 test_dataset = DataClass(split='test', transform=data_transform, download=True)
 
-# Split training data: 40% members, 40% non-members, 20% validation.
-# This must stay identical to the notebook's split so the checkpoints and the
-# notebook's member_loader / nonmember_loader refer to the same samples.
+# Split training data: 40% members, 40% non-members, leftover 20% for the control.
+# This must stay identical to the notebook's member / non-member cut so the
+# checkpoints and the notebook's member_loader / nonmember_loader refer to the
+# same samples. The notebook does not load the leftover 20%.
 total_size = len(train_dataset)
 indices = np.arange(total_size)
 np.random.shuffle(indices)
@@ -59,10 +60,10 @@ split2 = int(0.8 * total_size)
 
 member_indices = indices[:split1]
 nonmember_indices = indices[split1:split2]
-val_indices = indices[split2:]
+control_indices = indices[split2:]
 
 member_dataset = Subset(train_dataset, member_indices)
-val_dataset = Subset(train_dataset, val_indices)
+control_dataset = Subset(train_dataset, control_indices)
 test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
 
@@ -171,14 +172,14 @@ def train_with_dp(epsilon, epochs=EPOCHS):
 print(f"\n{'='*60}")
 print(f"Matched recipe: SGD lr={LR}, batch={BATCH_SIZE}, {EPOCHS} epochs, C={MAX_GRAD_NORM}")
 print(f"Members: {len(member_dataset)}, non-members: {len(nonmember_indices)}, "
-      f"validation: {len(val_dataset)}")
+      f"control holdout: {len(control_dataset)}")
 print(f"{'='*60}")
 
-# Control: trained on the validation split only, so it has seen neither the member nor
+# Control: trained on the leftover holdout only, so it has seen neither the member nor
 # the non-member samples. Whatever membership signal it shows is pure split noise, which
 # gives Phase 4 an empirical "no leakage" reference to compare every DP model against.
-print("\nTraining CONTROL model on the validation split (no members, no non-members)...")
-model_control = train_no_dp(val_dataset)
+print("\nTraining CONTROL model on the leftover holdout (no members, no non-members)...")
+model_control = train_no_dp(control_dataset)
 torch.save(model_control.state_dict(), "checkpoints/fc_control.pt")
 
 # Non-private reference: same optimizer and epoch budget, no clipping and no noise.
