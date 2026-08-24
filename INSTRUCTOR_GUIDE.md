@@ -22,9 +22,9 @@ Do **not** walk the room through the notebook cell by cell. Your role is facilit
 1. **Open with a 1-2 minute overview.** Do not let anyone start the notebook until you have said what the lab is about and what the four phases are. The Lab Roadmap cell (cell 3) exists for exactly this and mirrors what you should say out loud. In the last review, several people opened the notebook without knowing what they were about to do or why each step existed.
 2. **Release one phase at a time.** Give roughly 15 to 20 minutes per phase and let students read the instructions and code themselves.
 3. **Stop at the phase checkpoint.** Ask who finished. Hand out hints, or the solution cell, to anyone stuck.
-4. **Spend about three minutes on the checkpoint** before releasing the next phase. Run the script in each phase below. Do not invent extra questions.
+4. **At Phases 2, 3a, and 4, spend about three minutes on the discussion** before releasing the next phase. Run the script in each phase below. Do not invent extra questions. Phase 1 has no discussion — when people finish training, release Phase 2.
 
-Phases 1, 2, 3a, and 4 have a discussion cell. Phase 3b does not — do not open one. Takeaways sit behind an "After you discuss" disclosure. Do not read that disclosure aloud first.
+Phases 2, 3a, and 4 have a discussion cell. Phases 1 and 3b do not — do not open one. Takeaways sit behind an "After you discuss" disclosure. Do not read that disclosure aloud first.
 
 ## Time Allocation
 
@@ -33,7 +33,7 @@ Phases 1, 2, 3a, and 4 have a discussion cell. Phase 3b does not — do not open
 | Opening | Roadmap and framing, delivered verbally | 2 min | Listen, do not open the notebook yet |
 | Setup | Install packages, import libraries, select device | 2 min | Run the setup cell |
 | Phase 0 | Explore and split PneumoniaMNIST | 5 min | Run and inspect |
-| Phase 1 | Train the non-private baseline | 15 min | Complete TODO 1, then discuss |
+| Phase 1 | Train the non-private baseline | 15 min | Complete TODO 1; no discussion |
 | Phase 2 | Mount the membership inference attack | 15 min | Complete TODOs 2-3, then discuss |
 | Phase 3a | Implement DP-SGD from scratch | 20 min | Complete TODOs 4a-4b, then discuss |
 | Phase 3b | Train with Opacus and repeat the attack | 15 min | Complete TODOs 5-7; no discussion |
@@ -49,8 +49,8 @@ If you only have 60 minutes, pre-run the baseline training and treat the manual 
 
 Each checkpoint is built so the room cannot stall on "any thoughts?"
 
-- **Start with a number, not a concept.** Ask two people for their train/test, loss ratio, or chosen epsilon before you ask why.
-- **Force a side.** "Agree or disagree." "Train or test in the abstract." Then take one sentence from each side. Do not ask whether Phase 1 is "already privacy." Train/test is not member/non-member.
+- **Start with a number, not a concept.** Ask two people for their loss ratio, or chosen epsilon, before you ask why.
+- **Force a side.** "Agree or disagree." Then take one sentence from each side.
 - **You talk last.** The student cell hides the takeaway. Do not lecture it first.
 - **If nobody speaks after five seconds,** make the slightly wrong claim written in that phase and let them correct you. Do not rephrase the question.
 - **One primary question, then sit down.** Use the second question only if the first dies or you have leftover time.
@@ -112,17 +112,7 @@ Measured on this recipe (Adam, lr 1e-3, 20 epochs, member split of 1883 samples)
 | Test accuracy | 82% |
 | Member/test gap | 17 points |
 
-The validation cell no longer checks a numeric range for test accuracy. It previously advertised 85-93% in the phase header and 70-98% in the validation cell, while the recipe actually produces about 81%, which made students think they had broken something. Only two soft checks remain: the model fit its training data, and train accuracy exceeds test accuracy. Focus on the existence of a gap rather than on any specific number, and say out loud that results move by a few points across hardware and library versions.
-
-**Checkpoint discussion**
-
-The student cell asks which accuracy goes in a paper abstract, and what you would still need before calling the gap a membership leak. Do not let anyone name Phase 1 a leak. Train accuracy is measured on the member split; the other number is the official **test** set, not the held-out non-members.
-
-- **Open.** "Read out your two accuracies. I need two people." After two numbers: "Abstract gets train or test? And is this already a membership leak — yes or no."
-- **Good answers.** Abstract: test. The gap is overfitting: the model fits the training split better than the test set. That is not a leak. A leak needs members versus a matched non-member holdout, and a per-sample signal, not two aggregate accuracies. Some will say "test is also unseen, so it is the same idea." Let them say it, then correct the sets.
-- **If the room freezes.** "The test set is unseen, so this already is membership inference. We can skip Phase 2." Then wait.
-- **Land.** "This is a generalization gap. Leakage starts in Phase 2, when we compare members to the held-out non-members."
-- **Do not** ask "what do the accuracies tell us," "is there a gap," or "is this already a privacy problem." They can see the gap. Privacy language waits for Phase 2.
+The validation cell no longer checks a numeric range for test accuracy. It previously advertised 85-93% in the phase header and 70-98% in the validation cell, while the recipe actually produces about 81%, which made students think they had broken something. Only two soft checks remain: the model fit its training data, and train accuracy exceeds test accuracy. Results move by a few points across hardware and library versions. There is no discussion at the end of this phase. When people finish, release Phase 2.
 
 **Common mistakes**
 
