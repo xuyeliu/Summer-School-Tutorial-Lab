@@ -12,37 +12,24 @@
 
 ---
 
-## Phase 2 · 约 3–4 分钟
+## Phase 2 · 约 2 分钟
 
-他们刚看到：loss ratio 大约 6×，AUC 大约 0.50。**不要先解释 AUC。**
+他们刚看到：AUC ~0.70，threshold ~70%。轻讨论即可。
 
 **Open**
 
-> Stop here. I need two numbers from the same person: your loss ratio and your AUC.
+> Look at your AUC and threshold accuracy.
 >
-> An auditor writes: “The AUC is no better than random guessing, so this model does not leak.”
->
-> Looking at your own two numbers — agree or disagree?
-> Who is actually at risk: a typical patient, or someone in the tail of the loss plot?
-
-**If they talk**
-
-- 同意审计：*Then what is the 6× ratio?*
-- 只说 overfitting：*Can an outsider see that per example?*
-
-第二问只在还有时间时用：
-
-> Which of those two numbers would you report in a paper, and what would that choice hide?
+> 1. Can an outsider tell who was in training — yes or no? Which number convinced you?
+> 2. Would you release this model on real patient ultrasounds? Why?
 
 **Freeze**
 
-> I’m with the auditor. AUC is the standard metric. About 0.5 means we failed to find leakage, so Phase 1 was just overfitting.
+> 50% is a coin flip. You got about 70%. So…?
 
 **Land**
 
-> AUC needs a single global threshold. Most losses are near zero on both sides, so they tie. The groups separate only in the tail, which is too thin to move the AUC. An AUC near 0.5 is compatible with a large ratio. The identifiable people live in the tail. Phase 4 will measure that tail directly.
-
-不要问：loss ratio 是什么意思；不要在他们站边之前解释为什么 AUC 是 0.5。
+> Yes, it leaks. Next we add DP-SGD and see if the same attack gets harder.
 
 ---
 
@@ -120,9 +107,8 @@
 
 **Land**
 
-> An empirical attack is a lower bound on leakage. It never certifies privacy. A flat panel means this instrument ran out of resolution, not that ε = 200 is as safe as ε = 0.5. Epsilon bounds what any adversary could learn, including attacks we did not run.
->
-> Tomorrow, on text that appears once, do not expect this instrument to stay blind.
+> 1. Yes — left plot: smaller ε usually lowers test accuracy.
+> 2. No — a flat attack only means this attack found nothing. It does not prove privacy. Trust (ε, δ), not the flat curve.
 
 ---
 

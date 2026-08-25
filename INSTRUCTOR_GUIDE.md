@@ -24,7 +24,7 @@ Do **not** walk the room through the notebook cell by cell. Your role is facilit
 3. **Stop at the phase checkpoint.** Ask who finished. Hand out hints, or the solution cell, to anyone stuck.
 4. **Spend about three minutes on the checkpoint** before releasing the next phase. Run the script in each phase below. Do not invent extra questions.
 
-Phases 1, 2, 3a, and 4 have a discussion cell. Phase 3b does not — do not open one. Takeaways sit behind an "After you discuss" disclosure. Do not read that disclosure aloud first.
+Phases 2, 3a, and 4 have a discussion cell. Phase 1 and Phase 3b do not — do not open one. Takeaways sit behind an "After you discuss" disclosure. Do not read that disclosure aloud first.
 
 ## Time Allocation
 
@@ -33,7 +33,7 @@ Phases 1, 2, 3a, and 4 have a discussion cell. Phase 3b does not — do not open
 | Opening | Roadmap and framing, delivered verbally | 2 min | Listen, do not open the notebook yet |
 | Setup | Install packages, import libraries, select device | 2 min | Run the setup cell |
 | Phase 0 | Explore and split BreastMNIST | 5 min | Run and inspect |
-| Phase 1 | Train the non-private baseline | 15 min | Complete TODO 1, then discuss |
+| Phase 1 | Train the non-private baseline | 15 min | Complete TODO 1; no discussion |
 | Phase 2 | Mount the membership inference attack | 15 min | Complete TODOs 2-3, then discuss |
 | Phase 3a | Implement DP-SGD from scratch | 20 min | Complete TODOs 4a-4b, then discuss |
 | Phase 3b | Train with Opacus and repeat the attack | 15 min | Complete TODOs 5-7; no discussion |
@@ -50,7 +50,7 @@ If you only have 60 minutes, pre-run the baseline training and treat the manual 
 Each checkpoint is built so the room cannot stall on "any thoughts?"
 
 - **Start with a number, not a concept.** Ask two people for their train/test, loss ratio, or chosen epsilon before you ask why.
-- **Force a side.** "Agree or disagree." "Train or test in the abstract." Then take one sentence from each side. Do not ask whether Phase 1 is "already privacy." Train/test is not member/non-member.
+- **Force a side.** "Agree or disagree." Then take one sentence from each side. Do not treat Phase 1 train/test as member/non-member.
 - **You talk last.** The student cell hides the takeaway. Do not lecture it first.
 - **If nobody speaks after five seconds,** make the slightly wrong claim written in that phase and let them correct you. Do not rephrase the question.
 - **One primary question, then sit down.** Use the second question only if the first dies or you have leftover time.
@@ -61,7 +61,7 @@ Each checkpoint is built so the room cannot stall on "any thoughts?"
 1. Confirm that `checkpoints/` contains `fc_eps_0.5.pt`, `fc_eps_1.0.pt`, `fc_eps_2.0.pt`, `fc_eps_5.0.pt`, `fc_eps_10.0.pt`, `fc_eps_50.0.pt`, `fc_eps_200.0.pt`, `fc_eps_inf.pt`, and `fc_control.pt`.
 2. If the checkpoints are missing or incompatible, run `python generate_checkpoints.py` (about 20 minutes on a CPU).
 3. Run the solution notebook from a clean kernel on the target platform.
-4. Confirm that Phases 0–3 report all checks passing. Phase 4 may `[WARN]` on the tail-attack check (TPR@1%FPR is noisy on 218/218 samples); that is expected, not a broken setup.
+4. Confirm that Phases 0–3 report all checks passing. Phase 4 should usually pass the utility check; the tail-attack check may `[WARN]` on some regenerations (TPR@1%FPR is noisy on 218/218 samples) and that is still fine.
 5. Test the manual DP-SGD cell in advance. Its explicit per-sample loop is intentionally educational and can be slow.
 
 ## Phase-by-Phase Teaching Notes
@@ -114,15 +114,7 @@ Measured on this recipe (Adam, lr 1e-3, 60 epochs, 218 members from the BreastMN
 
 The validation cell uses two soft checks only: the model fit its training data (train accuracy > 90%), and train accuracy exceeds hold-out accuracy. Focus on the existence of a gap rather than on any specific number, and say out loud that results move by a few points across hardware and library versions. Hold-out accuracy is lower than a typical MedMNIST test number because the membership pool is small (218 training examples).
 
-**Checkpoint discussion**
-
-The student cell asks which accuracy goes in a paper abstract, and what you would still need before calling the gap a membership leak. Do not let anyone name Phase 1 a leak. Train accuracy is measured on the member split; the other number is a **hold-out carved from the official train split**, not the official BreastMNIST test set and not the held-out non-members.
-
-- **Open.** "Read out your two accuracies. I need two people." After two numbers: "Abstract gets train or test? And is this already a membership leak — yes or no."
-- **Good answers.** Abstract: the hold-out / test number. The gap is overfitting: the model fits the training split better than unseen data from the same pool. That is not a leak. A leak needs members versus a matched non-member holdout, and a per-sample signal, not two aggregate accuracies. Some will say "the hold-out is also unseen, so it is the same idea." Let them say it, then correct the sets.
-- **If the room freezes.** "The test set is unseen, so this already is membership inference. We can skip Phase 2." Then wait.
-- **Land.** "This is a generalization gap. Leakage starts in Phase 2, when we compare members to the held-out non-members."
-- **Do not** ask "what do the accuracies tell us," "is there a gap," or "is this already a privacy problem." They can see the gap. Privacy language waits for Phase 2.
+**No discussion here.** After TODO 1 and validation, go straight to Phase 2. Do not frame the train/hold-out gap as a membership leak — that comparison starts in Phase 2 with members versus held-out non-members.
 
 **Common mistakes**
 
@@ -182,13 +174,13 @@ The cell 12 plot uses a logarithmic loss axis plus a tail survival curve for tha
 
 **Checkpoint discussion**
 
-The student cell puts an auditor on record: "AUC 0.70 is not that high, so this model barely leaks." Do not unpack the metrics before they take a side. They should also have the cell 12b correct-count in front of them.
+Keep it short — results already show the attack works.
 
-- **Open.** "I need three numbers from the same person: loss ratio, AUC, and threshold-attack accuracy." Write them up. "Agree or disagree with the auditor."
-- **Good answers.** Disagree: a moderate AUC can sit next to a huge loss ratio and ~70% threshold accuracy. The at-risk people are in the high-loss tail, not the typical patient. Reporting only AUC would hide them.
-- **If the room freezes.** "I'm with the auditor. 0.70 is only a bit above chance, so Phase 1 was just overfitting." Then wait.
-- **Land.** Reveal the disclosure, or say: "AUC averages over everyone. The leak is concentrated in the tail. Cell 12b already beat random with one cut on loss. Phase 4 also measures a tail rate."
-- **Do not** ask "what does the loss ratio mean." Do not unpack the percentile table first.
+- **Open.** "Yes or no: can an outsider tell who was in training? Which number convinced you? Would you release this model on real ultrasounds?"
+- **Good answers.** Yes — AUC ~0.70 or ~70% accuracy beats 50%. Usually: would not ship without a defense.
+- **If the room freezes.** "50% is chance. You got ~70%. What does that mean for a patient?"
+- **Land.** Reveal the disclosure, or say: "Membership is guessable from loss. Next we add DP-SGD and re-run the same attack."
+- **Do not** reopen metric definitions.
 
 **Common mistakes**
 
@@ -371,17 +363,17 @@ Phases 1–3 train **Adam** live. Phase 4 loads **SGD** checkpoints (same archit
 
 | Epsilon | Hold-out acc | Loss ratio | MIA AUC | Tail attack |
 |---|---|---|---|---|
-| 0.5 | 60.9% | 0.95x | 0.50 | 0.005 |
-| 1.0 | 65.5% | 0.93x | 0.51 | 0.005 |
-| 2.0 | 72.7% | 0.83x | 0.53 | 0.014 |
-| 5.0 | 68.2% | 0.90x | 0.53 | 0.009 |
-| 10.0 | 68.2% | 0.93x | 0.53 | 0.018 |
-| 50.0 | 68.2% | 0.94x | 0.52 | 0.014 |
-| 200.0 | 68.2% | 0.93x | 0.52 | 0.014 |
-| inf | 60.9% | 1.23x | 0.56 | 0.018 |
+| 0.5 | 52.7% | 0.92x | 0.49 | 0.005 |
+| 1.0 | 55.5% | 0.92x | 0.50 | 0.005 |
+| 2.0 | 70.9% | 0.95x | 0.48 | 0.009 |
+| 5.0 | 68.2% | 0.93x | 0.48 | 0.005 |
+| 10.0 | 68.2% | 0.91x | 0.50 | 0.005 |
+| 50.0 | 68.2% | 0.92x | 0.51 | 0.014 |
+| 200.0 | 68.2% | 0.92x | 0.52 | 0.014 |
+| inf | 62.7% | 1.24x | 0.56 | 0.023 |
 | control | -- | 0.91x | 0.48 | 0.009 |
 
-Utility still moves with epsilon: ε = 0.5 is weakest (~61%), the best DP setting is ε = 2 (~73%). The inf SGD model does **not** dominate on hold-out accuracy here. The Phase 4 validation cell may `[WARN]` that the non-private tail rate is not clearly above control (0.018 vs 0.009). That is high-variance 1% FPR on 218 samples, not a broken lab. Phases 0–3 should still be all PASS.
+Utility still moves with epsilon: ε = 0.5 is weakest (~53%), the best DP setting is ε = 2 (~71%). The inf SGD model does **not** dominate on hold-out accuracy here. On a fresh regenerate the tail check can `[PASS]` (inf 0.023 vs control 0.009); it may still `[WARN]` on another seed because 1% FPR on 218 samples is high-variance. That is not a broken lab. Phases 0–3 should still be all PASS.
 
 **How to read the leakage panel**
 
