@@ -11,7 +11,7 @@ The student notebook contains eight TODOs. Each code cell is introduced by a num
 | File | Purpose |
 |---|---|
 | `privacy_lab_student.ipynb` | Student notebook with TODO scaffolding |
-| `privacy_lab_solution.ipynb` | Completed reference notebook (kept local; not published in this repo) |
+| `privacy_lab_solution.ipynb` | Completed reference notebook for instructors / collaborators |
 | `generate_checkpoints.py` | Regenerates the Phase 4 checkpoints |
 | `checkpoints/` | Pre-trained fully connected models for the epsilon sweep |
 
