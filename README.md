@@ -56,7 +56,7 @@ python make_qr.py
 
 This repo provides a practical walkthrough of **Membership Inference Attacks (MIA)** and demonstrates how **Differentially Private (DP) training** reduces leakage.
 
-We use **MedMNIST (Medical MNIST)**, a lightweight medical-imaging benchmark, to make the privacy risk concrete. The main message is that overfitting will have privacy consequences.
+We use **BreastMNIST** from MedMNIST: 28×28 breast ultrasound images, binary malignant vs normal/benign. The privacy experiment uses only the official **train** split (546 images), cut into members / non-members / hold-out. The main message is that overfitting will have privacy consequences.
 
 
 ---
@@ -65,7 +65,7 @@ We use **MedMNIST (Medical MNIST)**, a lightweight medical-imaging benchmark, to
 
 By running the notebook, you will:
 
-1. Train a baseline classifier on MedMNIST.
+1. Train a baseline classifier on BreastMNIST.
 2. Measure generalization gap / overfitting.
 3. Implement a membership inference attack that uses the model's per-sample loss as the test statistic.
 4. Train the same model with DP (e.g., DP-SGD), first from scratch and then with Opacus.
