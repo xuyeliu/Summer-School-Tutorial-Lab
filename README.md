@@ -35,7 +35,7 @@ python make_qr.py
 
 This repo provides a practical walkthrough of **Membership Inference Attacks (MIA)** and demonstrates how **Differentially Private (DP) training** reduces leakage.
 
-We use **BreastMNIST** from MedMNIST: 28×28 breast ultrasound images, binary malignant vs normal/benign. The privacy experiment uses only the official **train** split (546 images), cut into members / non-members / hold-out. The main message is that overfitting will have privacy consequences.
+We use **BreastMNIST** from MedMNIST: 28×28 breast ultrasound images, binary malignant vs normal/benign. The privacy experiment splits the official **train** set 50/50 into members / non-members, and measures utility on the official **test** set. The main message is that overfitting will have privacy consequences.
 
 
 ---
