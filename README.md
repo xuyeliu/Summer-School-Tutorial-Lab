@@ -16,19 +16,12 @@ These links open the notebook read-only from GitHub, so nobody can overwrite the
 
 ## Sharing the lab in a session
 
-QR codes for the **student notebook** (opens read-only in Colab from GitHub). Participants keep their work with `File > Save a copy in Drive`.
+QR code for the **student notebook** (opens read-only in Colab from GitHub). Participants keep their work with `File > Save a copy in Drive`.
 
-Colab link: [Open in Colab](https://colab.research.google.com/github/xuyeliu/Summer-School-Tutorial-Lab/blob/main/privacy_lab_student.ipynb)
+- Colab link: [Open in Colab](https://colab.research.google.com/github/xuyeliu/Summer-School-Tutorial-Lab/blob/main/privacy_lab_student.ipynb)
+- QR: [`docs/qr/qr_colab_huge.png`](docs/qr/qr_colab_huge.png)
 
-Files live in [`docs/qr/`](docs/qr/) (also served over Pages):
-
-| File | Use |
-| --- | --- |
-| [`qr_colab_huge_labeled.png`](docs/qr/qr_colab_huge_labeled.png) | Opening slide, caption underneath |
-| [`qr_colab_huge.png`](docs/qr/qr_colab_huge.png) / [`.svg`](docs/qr/qr_colab_huge.svg) | Opening slide, bare code |
-| [`qr_colab_corner.png`](docs/qr/qr_colab_corner.png) / [`.svg`](docs/qr/qr_colab_corner.svg) | Later slides, top-right corner |
-
-To regenerate after changing the notebook URL, edit `COLAB_URL` in [`make_qr.py`](make_qr.py) and run it. The script decodes its own output and fails loudly if the codes do not round-trip:
+To regenerate after changing the notebook URL, edit `COLAB_URL` in [`make_qr.py`](make_qr.py) and run it:
 
 ```bash
 pip install segno
